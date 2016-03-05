@@ -6,47 +6,59 @@ $(function () {
     });
     $('#cell-form').submit(function (e) {
         e.preventDefault();
-        $('td.active').html($('#cell-edit').val());
+        var $td = $('td.active');
+        var key = $td.parent().attr('data-key');
+        var col = $td.closest('table').find('th').eq($td.index()).html();
+        var val = $('#cell-edit').find('input').val();
+        var data = {key: key, col: col, val: val};
+        var dataJSON = JSON.stringify(data);
+        console.log("sending 'update table cell' " + dataJSON);
+        server.emit('update table cell', dataJSON);
     });
     $('body').click(function (e) {
         $('td').removeClass('active');
+        $('#cell-edit').addClass('disabled').find('input').val('');
+        $('#cell-ok').addClass('disabled');
     });
     $('#new-row').click(function (e) {
-        var row = {date: "", account: "", category: "", description: "", notes: ""};
+        var row = {};
+        $('th').each(function(){
+            row[$(this).html()] = "";
+        });
         var rowJSON = JSON.stringify(row);
-        console.log("sending 'new table row' to server");
+        console.log("sending 'new table row' " + rowJSON);
         server.emit('new table row', rowJSON);
     });
 
     var tdOnClick = function (e) {
         $('td').removeClass('active');
         $(this).addClass('active');
-        $('#cell-edit').val($(this).html());
+        $('#cell-edit').removeClass('disabled').find('input').focus().val($(this).html());
+        $('#cell-ok').removeClass('disabled');
     };
 
     server.on('connect', function () {
-        console.log('established new connection to server, clearing local grocery list');
+        console.log('established new connection to server, clearing local table');
+        $('tbody').html('');
         console.log("sending 'request all' to server");
         server.emit("request all");
     });
-    server.on('update grocery item', function (groceryUpdateJSON) {
-        console.log("received 'update grocery item' " + groceryUpdateJSON);
+    server.on('update table cell', function (dataJSON) {
+        console.log("received 'update table cell' " + dataJSON);
+        var data = JSON.parse(dataJSON);
+        var index = $('th:contains(' + data.col + ')').index();
+        console.log(index);
+        $('tr[data-key="' + data.key + '"]').find('td').eq(index).html(data.val);
     });
     server.on('new table row', function (rowJSON) {
         console.log("received 'new table row' " + rowJSON);
         var row = JSON.parse(rowJSON);
-        var $date = $('<td>' + row.data.date + '</td>');
-        $date.click(tdOnClick);
-        var $account = $('<td>' + row.data.account + '</td>');
-        $account.click(tdOnClick);
-        var $category = $('<td>' + row.data.category + '</td>');
-        $category.click(tdOnClick);
-        var $description = $('<td>' + row.data.description + '</td>');
-        $description.click(tdOnClick);
-        var $notes = $('<td>' + row.data.notes + '</td>');
-        $notes.click(tdOnClick);
-        var $tr = $('<tr></tr>');
-        $tr.append($date, $account, $category, $description, $notes);
+        var $tr = $('<tr data-key="' + row.key + '"></tr>');
+        $('th').each(function(){
+            var $td = $('<td>' + row.data[$(this).html()] + '</td>');
+            $td.click(tdOnClick);
+            $tr.append($td);
+        });
         $('table').append($tr);
     });
 });

@@ -38,6 +38,12 @@ var handleClientConnections = function () {
                 broadcastAll(client, "new table row", JSON.stringify({key: rowKey, data: row}));
             });
         });
+        client.on('update table cell', function(dataJSON){
+            console.log("received 'update table cell' " + dataJSON);
+            var data = JSON.parse(dataJSON);
+            redisClient.hset(data.key, data.col, data.val);
+            broadcastAll(client, "update table cell", dataJSON);
+        });
         client.on('remove grocery item', function (groceryKey) {
             console.log("received 'remove grocery item' for " + groceryKey);
             redisClient.del(groceryKey);
