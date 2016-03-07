@@ -86,5 +86,13 @@ app.get('/css/:filename', function (req, res) {
     res.sendFile(__dirname + '/css/' + req.params.filename);
 });
 
+app.get('/css/vendor/:filename', function (req, res) {
+    res.sendFile(__dirname + '/css/vendor/' + req.params.filename);
+});
+
+app.get('/css/vendor/themes/default/assets/fonts/:filename', function (req, res) {
+    res.sendFile(__dirname + '/css/vendor/themes/default/assets/fonts/' + req.params.filename);
+});
+
 server.listen(process.env.PORT || 8080);
 
