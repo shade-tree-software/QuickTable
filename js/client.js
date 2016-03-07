@@ -1,6 +1,11 @@
 $(function () {
     var server = io.connect(window.location.href);
 
+    $('table').tablesort();
+    $("thead th:contains('Date')").data('sortBy', function(th, td, tablesort) {
+        return new Date(td.text());
+    });
+
     $('#table').click(function (e) {
         e.stopPropagation();
     });
@@ -47,7 +52,6 @@ $(function () {
         console.log("received 'update table cell' " + dataJSON);
         var data = JSON.parse(dataJSON);
         var index = $('th:contains(' + data.col + ')').index();
-        console.log(index);
         $('tr[data-key="' + data.key + '"]').find('td').eq(index).html(data.val);
     });
     server.on('new table row', function (rowJSON) {
