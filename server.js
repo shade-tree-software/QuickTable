@@ -13,14 +13,14 @@ var broadcastAll = function (client, message, data, logData) {
 };
 
 var encryptString = function (plainText) {
-    const cipher = crypto.createCipher('aes192', 'a password');
+    const cipher = crypto.createCipher('aes192', process.env.ENCRYPTION_KEY);
     var encrypted = cipher.update(plainText, 'utf8', 'hex');
     encrypted += cipher.final('hex');
     return encrypted;
 };
 
 var decryptString = function (cipherText) {
-    const decipher = crypto.createDecipher('aes192', 'a password');
+    const decipher = crypto.createDecipher('aes192', process.env.ENCRYPTION_KEY);
     var decrypted = decipher.update(cipherText, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
     return decrypted;
@@ -96,17 +96,9 @@ var handleClientConnections = function () {
     });
 };
 
-console.log("hello");
-var ct = encryptString("hello");
-console.log(ct);
-console.log(decryptString(ct));
-
-var pt = {first: "John", last: "Doe"};
-console.log(JSON.stringify(pt));
-ct = encryptRow(pt);
-console.log(JSON.stringify(ct));
-console.log(JSON.stringify(decryptRow(ct)));
-
+if (!process.env.ENCRYPTION_KEY){
+    console.log("No encryption key!");
+}
 console.log("connecting to redis");
 redisClient = redis.createClient(process.env.REDIS_URL);
 redisClient.on("error", function (err) {
