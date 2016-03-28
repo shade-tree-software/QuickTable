@@ -1,7 +1,13 @@
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
+var fs = require('fs');
+var ssl_server = require('https').createServer({
+    key: fs.readFileSync('key.pem'),
+    cert: fs.readFileSync('cert.pem')
+}, app);
 var io = require('socket.io')(server);
+var ssl_io = require('socket.io')(ssl_server);
 var redis = require('redis');
 var redisClient = null;
 const crypto = require('crypto');
@@ -43,7 +49,7 @@ var decryptRow = function (cipherTextRow) {
 };
 
 var handleClientConnections = function () {
-    io.on('connection', function (client) {
+    var runMe = function (client) {
         console.log('new client connected: ' + client.request.connection.remoteAddress);
         client.on('request all', function () {
             console.log("received 'request all' from client");
@@ -93,7 +99,9 @@ var handleClientConnections = function () {
             var newDataPlainTextJSON = JSON.stringify(newDataPlainText);
             broadcastAll(client, "update table cell", newDataPlainTextJSON, dataCipherTextJSON);
         });
-    });
+    };
+    io.on('connection', runMe);
+    ssl_io.on('connection', runMe);
 };
 
 if (!process.env.ENCRYPTION_KEY){
@@ -133,5 +141,10 @@ app.get('/css/vendor/themes/default/assets/fonts/:filename', function (req, res)
 var port = process.env.PORT || 8080;
 server.listen(port, function () {
     console.log('listening on port ' + port);
+});
+
+var ssl_port = process.env.SSL_PORT || 8081;
+ssl_server.listen(ssl_port, function () {
+    console.log('listening on ssl port ' + ssl_port);
 });
 
