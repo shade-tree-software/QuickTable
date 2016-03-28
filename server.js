@@ -4,11 +4,42 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var redis = require('redis');
 var redisClient = null;
+const crypto = require('crypto');
 
-var broadcastAll = function (client, message, data) {
-    console.log("broadcasting '" + message + "' " + data);
+var broadcastAll = function (client, message, data, logData) {
+    console.log("broadcasting '" + message + "' " + logData || data);
     client.broadcast.emit(message, data);
     client.emit(message, data);
+};
+
+var encryptString = function (plainText) {
+    const cipher = crypto.createCipher('aes192', 'a password');
+    var encrypted = cipher.update(plainText, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    return encrypted;
+};
+
+var decryptString = function (cipherText) {
+    const decipher = crypto.createDecipher('aes192', 'a password');
+    var decrypted = decipher.update(cipherText, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+};
+
+var encryptRow = function (plainTextRow) {
+    var cipherTextRow = {};
+    Object.keys(plainTextRow).forEach(function (key) {
+        cipherTextRow[key] = encryptString(plainTextRow[key]);
+    });
+    return cipherTextRow;
+};
+
+var decryptRow = function (cipherTextRow) {
+    var plainTextRow = {};
+    Object.keys(cipherTextRow).forEach(function (key) {
+        plainTextRow[key] = decryptString(cipherTextRow[key]);
+    });
+    return plainTextRow;
 };
 
 var handleClientConnections = function () {
@@ -19,49 +50,62 @@ var handleClientConnections = function () {
             redisClient.smembers('row keys', function (err, rowKeys) {
                 console.log('found row keys [' + rowKeys + ']');
                 rowKeys.forEach(function (rowKey) {
-                    redisClient.hgetall(rowKey, function (err, rowData) {
-                        var rowDataJSON = JSON.stringify({key: rowKey, data: rowData});
-                        console.log("sending 'new table row' to client " + rowDataJSON);
-                        client.emit('new table row', rowDataJSON);
+                    redisClient.hgetall(rowKey, function (err, rowDataCipherText) {
+                        var rowDataCipherTextJSON = JSON.stringify({key: rowKey, data: rowDataCipherText});
+                        var rowDataPlainText = decryptRow(rowDataCipherText);
+                        var rowDataPlainTextJSON = JSON.stringify({key: rowKey, data: rowDataPlainText});
+                        console.log("sending 'new table row' to client " + rowDataCipherTextJSON);
+                        client.emit('new table row', rowDataPlainTextJSON);
                     });
                 });
             });
         });
-        client.on('new table row', function (rowJSON) {
-            console.log("received 'new table row' " + rowJSON);
-            var row = JSON.parse(rowJSON);
+        client.on('new table row', function (rowPlainTextJSON) {
+            var rowPlainText = JSON.parse(rowPlainTextJSON);
+            var rowCipherText = encryptRow(rowPlainText);
+            var rowCipherTextJSON = JSON.stringify(rowCipherText);
+            console.log("received 'new table row' " + rowCipherTextJSON);
             redisClient.incr('next row id', function (err, newKey) {
                 var rowKey = 'rows:' + newKey;
-                console.log('inserting item ' + rowKey + ' ' + rowJSON);
+                console.log('inserting item ' + rowKey + ' ' + rowCipherTextJSON);
                 redisClient.sadd('row keys', rowKey);
-                redisClient.hmset(rowKey, row);
-                broadcastAll(client, "new table row", JSON.stringify({key: rowKey, data: row}));
+                redisClient.hmset(rowKey, rowCipherText);
+                broadcastAll(client, "new table row", JSON.stringify({key: rowKey, data: rowPlainText}),
+                    JSON.stringify({key: rowKey, data: rowCipherText}));
             });
         });
-        client.on('update table cell', function(dataJSON){
-            console.log("received 'update table cell' " + dataJSON);
-            var data = JSON.parse(dataJSON);
-            redisClient.hset(data.key, data.col, data.val);
-            broadcastAll(client, "update table cell", dataJSON);
-        });
-        client.on('remove grocery item', function (groceryKey) {
-            console.log("received 'remove grocery item' for " + groceryKey);
-            redisClient.del(groceryKey);
-            redisClient.srem('grocery keys', groceryKey);
-            broadcastAll(client, "remove grocery item", groceryKey);
-        });
-        client.on('toggle in cart', function (groceryKey) {
-            console.log("received 'toggle in cart' for " + groceryKey);
-            redisClient.hget(groceryKey, 'in_cart', function (err, val) {
-                var newVal = (val === 'true' ? 'false' : 'true');
-                console.log('updating ' + groceryKey + " 'in_cart' to '" + newVal + "'");
-                redisClient.hset(groceryKey, 'in_cart', newVal);
-                var data = JSON.stringify({key: groceryKey, update: {'in_cart': newVal}});
-                broadcastAll(client, 'update grocery item', data);
-            });
+        client.on('update table cell', function (origDataPlainTextJSON) {
+            var origDataPlainText = JSON.parse(origDataPlainTextJSON);
+            var valCipherText = encryptString(origDataPlainText.val);
+            var dataCipherText = {
+                key: origDataPlainText.key,
+                col: origDataPlainText.col,
+                val: valCipherText
+            };
+            var dataCipherTextJSON = JSON.stringify(dataCipherText);
+            console.log("received 'update table cell' " + dataCipherTextJSON);
+            redisClient.hset(origDataPlainText.key, origDataPlainText.col, valCipherText);
+            var newDataPlainText = {
+                key: origDataPlainText.key,
+                col: origDataPlainText.col,
+                val: decryptString(valCipherText)
+            };
+            var newDataPlainTextJSON = JSON.stringify(newDataPlainText);
+            broadcastAll(client, "update table cell", newDataPlainTextJSON, dataCipherTextJSON);
         });
     });
 };
+
+console.log("hello");
+var ct = encryptString("hello");
+console.log(ct);
+console.log(decryptString(ct));
+
+var pt = {first: "John", last: "Doe"};
+console.log(JSON.stringify(pt));
+ct = encryptRow(pt);
+console.log(JSON.stringify(ct));
+console.log(JSON.stringify(decryptRow(ct)));
 
 console.log("connecting to redis");
 redisClient = redis.createClient(process.env.REDIS_URL);
@@ -94,5 +138,8 @@ app.get('/css/vendor/themes/default/assets/fonts/:filename', function (req, res)
     res.sendFile(__dirname + '/css/vendor/themes/default/assets/fonts/' + req.params.filename);
 });
 
-server.listen(process.env.PORT || 8080);
+var port = process.env.PORT || 8080;
+server.listen(port, function () {
+    console.log('listening on port ' + port);
+});
 
