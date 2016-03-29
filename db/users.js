@@ -1,6 +1,6 @@
 module.exports = function (redisClient, encryption) {
     return {
-        createNew: function(username, password){
+        createNew: function (username, password) {
             redisClient.incr('next user id', function (err, newKey) {
                 var userKey = 'users:' + newKey;
                 redisClient.sadd('user keys', userKey);
@@ -11,18 +11,28 @@ module.exports = function (redisClient, encryption) {
         findByUsername: function (username, cb) {
             var found = false;
             redisClient.smembers('user keys', function (err, userKeys) {
+                var numUsers = userKeys.length;
+                var counter = 0;
                 if (err) {
                     cb(err);
+                } else if (numUsers === 0) {
+                    cb(null, false);
                 } else {
                     userKeys.forEach(function (userKey) {
                         redisClient.hgetall(userKey, function (err, user) {
+                            counter++;
                             if (err) {
                                 cb(err);
                             } else {
-                                console.log("checking " + JSON.stringify(user));
-                                if (found === false && user.username === username) {
-                                    found = true;
-                                    cb(null, user);
+                                if (found === false) {
+                                    if (user.username === username) {
+                                        found = true;
+                                        cb(null, user);
+                                    } else {
+                                        if (counter === numUsers) {
+                                            cb(null, false);
+                                        }
+                                    }
                                 }
                             }
                         });
