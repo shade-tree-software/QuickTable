@@ -148,7 +148,7 @@ app.get('/login', function (req, res) {
 });
 
 app.post('/login',
-    passport.authenticate('local', {failureRedirect: '/none'}),
+    passport.authenticate('local', {failureRedirect: '/login'}),
     function (req, res) {
         res.redirect('/');
     });
