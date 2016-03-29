@@ -8,29 +8,38 @@ var ssl_server = require('https').createServer({
     cert: fs.readFileSync('cert.pem')
 }, app);
 var ssl_io = require('socket.io')(ssl_server);
-var socketIOHandlers = require('./socketIOHandlers');
+console.log("connecting to redis");
+var redisClient = require('redis').createClient(process.env.REDIS_URL);
+redisClient.on("error", function (err) {
+    console.log(err.toString());
+});
+var encryption = require('./encryption');
+
+var users = require('./db/users')(redisClient, encryption);
+var socketIOHandlers = require('./socketIOHandlers')(redisClient, encryption);
 
 ssl_io.on('connection', socketIOHandlers);
 
 passport.use(new localStrategy(
     function (username, password, done) {
-        console.log('got username=' + username + ' password=' + password);
-        if (username === 'test') {
-            return done(null, {id: 1});
-        } else {
-            return done(null, false);
-        }
+        users.findByUsername(username, function (err, user) {
+            if (err) { return done(err); }
+            if (!user) { return done(null, false); }
+            if (user.password !== encryption.hashString(password)) { return done(null, false); }
+            return done(null, user);
+        });
     }
 ));
 
 passport.serializeUser(function (user, cb) {
-    console.log(JSON.stringify(user));
     cb(null, user.id);
 });
 
 passport.deserializeUser(function (id, cb) {
-    console.log(id);
-    cb(null, {id: 1});
+    users.findById(id, function (err, user) {
+        if (err) { return cb(err); }
+        cb(null, user);
+    });
 });
 
 app.use(require('body-parser').urlencoded({extended: true}));
@@ -42,6 +51,16 @@ app.use(require('express-session')({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.get('/user/new', function (req, res) {
+    res.sendFile(__dirname + '/new_user.html');
+});
+
+app.post('/user/create',
+    function (req, res) {
+        users.createNew(req.body.username, req.body.password);
+        res.redirect('/');
+    });
 
 app.get('/login', function (req, res) {
     res.sendFile(__dirname + '/login.html');

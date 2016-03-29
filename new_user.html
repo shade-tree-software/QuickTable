@@ -1,0 +1,40 @@
+<!doctype html>
+<html class="no-js" lang="">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="/css/vendor/normalize.css">
+    <link rel="stylesheet" href="/css/vendor/semantic.min.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <script src="/js/vendor/modernizr-2.8.3.min.js"></script>
+</head>
+<body>
+<!--[if lt IE 8]>
+<p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade
+    your browser</a> to improve your experience.</p>
+<![endif]-->
+
+<!-- Add your site or application content here -->
+<div class="ui container">
+    <br>
+    <form class="ui form" method="post" action="/user/create">
+        <h1>Create New User</h1>
+        <div class="field ui input">
+            <input type="text" name="username" placeholder="username">
+        </div><br>
+        <div class="field ui input">
+            <input type="password" name="password" placeholder="password">
+        </div><br>
+        <div class="field ui input">
+            <input type="password" name="confirmPassword" placeholder="confirm password">
+        </div><br>
+        <button class="ui button" type="submit">Submit</button>
+    </form>
+</div>
+
+</body>
+</html>
