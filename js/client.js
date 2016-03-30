@@ -2,8 +2,9 @@ $(function () {
     var server = io.connect(window.location.href);
 
     $('table').tablesort();
-    $("thead th:contains('Date')").data('sortBy', function(th, td, tablesort) {
-        return new Date(td.text());
+    $("thead th:contains('Date')").data('sortBy', function (th, td, tablesort) {
+        var dateString = td.find('span.data').text();
+        return new Date(dateString);
     });
 
     $('#table').click(function (e) {
@@ -27,8 +28,11 @@ $(function () {
     });
     $('#new-row').click(function (e) {
         var row = {};
-        $('th').each(function(){
-            row[$(this).html()] = "";
+        $('th').each(function () {
+            var thText = $(this).html();
+            if (thText.length > 0) {
+                row[thText] = "";
+            }
         });
         var rowJSON = JSON.stringify(row);
         console.log("sending 'new table row' " + rowJSON);
@@ -40,6 +44,13 @@ $(function () {
         $(this).addClass('active');
         $('#cell-edit').removeClass('disabled').find('input').focus().val($(this).find('span.data').html());
         $('#cell-ok').removeClass('disabled');
+    };
+
+    var trashOnClick = function (e) {
+        var key = $(this).parent().attr('data-key');
+        var dataJSON = JSON.stringify({key: key});
+        console.log("sending 'delete row' " + dataJSON);
+        server.emit('delete row', dataJSON);
     };
 
     server.on('connect', function () {
@@ -54,18 +65,31 @@ $(function () {
         var index = $('th:contains(' + data.col + ')').index();
         $('tr[data-key="' + data.key + '"]').find('td').eq(index).find('span.data').html(data.val);
     });
+    server.on('delete row', function (dataJSON) {
+        console.log("received 'delete row' " + dataJSON);
+        var data = JSON.parse(dataJSON);
+        $('tr[data-key="' + data.key + '"]').remove();
+    });
     server.on('new table row', function (rowJSON) {
         console.log("received 'new table row' " + rowJSON);
         var row = JSON.parse(rowJSON);
         var $tr = $('<tr data-key="' + row.key + '"></tr>');
-        $('th').each(function(){
+        var $smallTrashIcon = $('<i class="smallDisplay ui left aligned trash outline icon"></i>');
+        var $largeTrashIcon = $('<i class="largeDisplay ui center aligned trash outline icon"></i>');
+        $trashTd = $('<td class="ui collapsing"></td>');
+        $trashTd.append($smallTrashIcon).append($largeTrashIcon);
+        $trashTd.click(trashOnClick);
+        $tr.append($trashTd);
+        $('th').each(function () {
             var thText = $(this).html();
-            var $td = $('<td>');
-            var $span1 = $('<span class="header smallDisplay">' + thText + ': </span>');
-            var $span2 = $('<span class="data">' + row.data[thText] + '</span>');
-            $td.click(tdOnClick);
-            $td.append($span1).append($span2);
-            $tr.append($td);
+            if (thText.length > 0) {
+                var $td = $('<td>');
+                var $span1 = $('<span class="header smallDisplay">' + thText + ': </span>');
+                var $span2 = $('<span class="data">' + row.data[thText] + '</span>');
+                $td.click(tdOnClick);
+                $td.append($span1).append($span2);
+                $tr.append($td);
+            }
         });
         $('table').append($tr);
     });

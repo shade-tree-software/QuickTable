@@ -36,6 +36,13 @@ module.exports = function (redisClient, encryption) {
                     JSON.stringify({key: rowKey, data: rowCipherText}));
             });
         });
+        client.on('delete row', function (dataJSON) {
+            var data = JSON.parse(dataJSON);
+            console.log("received 'delete row' " + dataJSON);
+            redisClient.del(data.key);
+            redisClient.srem('row keys', data.key);
+            broadcastAll(client, "delete row", dataJSON, dataJSON);
+        });
         client.on('update table cell', function (origDataPlainTextJSON) {
             var origDataPlainText = JSON.parse(origDataPlainTextJSON);
             var valCipherText = encryption.encryptString(origDataPlainText.val);

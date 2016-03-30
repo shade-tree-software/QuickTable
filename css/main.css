@@ -97,13 +97,14 @@ textarea {
 
 
 
-@media (max-width: 780px) {
+@media only screen and (max-width: 767px) {
+    .ui.table:not(.unstackable) tr>td.largeDisplay, /* overrides semantic ui style */
     .largeDisplay {
         display: none !important;
     }
 }
 
-@media (min-width: 779px) {
+@media only screen and (min-width: 768px) {
     .smallDisplay {
         display: none !important;
     }
