@@ -38,7 +38,7 @@ $(function () {
     var tdOnClick = function (e) {
         $('td').removeClass('active');
         $(this).addClass('active');
-        $('#cell-edit').removeClass('disabled').find('input').focus().val($(this).html());
+        $('#cell-edit').removeClass('disabled').find('input').focus().val($(this).find('span.data').html());
         $('#cell-ok').removeClass('disabled');
     };
 
@@ -52,15 +52,19 @@ $(function () {
         console.log("received 'update table cell' " + dataJSON);
         var data = JSON.parse(dataJSON);
         var index = $('th:contains(' + data.col + ')').index();
-        $('tr[data-key="' + data.key + '"]').find('td').eq(index).html(data.val);
+        $('tr[data-key="' + data.key + '"]').find('td').eq(index).find('span.data').html(data.val);
     });
     server.on('new table row', function (rowJSON) {
         console.log("received 'new table row' " + rowJSON);
         var row = JSON.parse(rowJSON);
         var $tr = $('<tr data-key="' + row.key + '"></tr>');
         $('th').each(function(){
-            var $td = $('<td>' + row.data[$(this).html()] + '</td>');
+            var thText = $(this).html();
+            var $td = $('<td>');
+            var $span1 = $('<span class="header smallDisplay">' + thText + ': </span>');
+            var $span2 = $('<span class="data">' + row.data[thText] + '</span>');
             $td.click(tdOnClick);
+            $td.append($span1).append($span2);
             $tr.append($td);
         });
         $('table').append($tr);

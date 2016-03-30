@@ -4,6 +4,12 @@ if (!process.env.ENCRYPTION_KEY){
     console.log("No encryption key!");
 }
 
+var hashString = function(string){
+    const hash = crypto.createHash('sha256');
+    hash.update(string);
+    return hash.digest('hex');
+};
+
 var encryptString = function (plainText) {
     const cipher = crypto.createCipher('aes192', process.env.ENCRYPTION_KEY);
     var encrypted = cipher.update(plainText, 'utf8', 'hex');
@@ -34,6 +40,7 @@ var decryptRow = function (cipherTextRow) {
     return plainTextRow;
 };
 
+exports.hashString = hashString;
 exports.encryptString = encryptString;
 exports.decryptString = decryptString;
 exports.encryptRow = encryptRow;
