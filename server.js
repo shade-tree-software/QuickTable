@@ -44,7 +44,7 @@ passport.deserializeUser(function (id, cb) {
 
 app.use(require('body-parser').urlencoded({extended: true}));
 app.use(require('express-session')({
-    secret: 'keyboard cat',
+    secret: process.env.ENCRYPTION_KEY,
     resave: false,
     saveUninitialized: false,
     cookie: {secure: true}
@@ -58,7 +58,11 @@ app.get('/user/new', function (req, res) {
 
 app.post('/user/create',
     function (req, res) {
-        users.createNew(req.body.username, req.body.password);
+        if (req.body.key === process.env.ENCRYPTION_KEY) {
+            users.createNew(req.body.username, req.body.password);
+        } else {
+            console.log('Incorrect key.  Cannot create new user.');
+        }
         res.redirect('/');
     });
 

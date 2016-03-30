@@ -21,10 +21,10 @@ module.exports = function (redisClient, encryption) {
                     userKeys.forEach(function (userKey) {
                         redisClient.hgetall(userKey, function (err, user) {
                             counter++;
-                            if (err) {
-                                cb(err);
-                            } else {
-                                if (found === false) {
+                            if (found === false) {
+                                if (err) {
+                                    cb(err);
+                                } else {
                                     if (user.username === username) {
                                         found = true;
                                         cb(null, user);

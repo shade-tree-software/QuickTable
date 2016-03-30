@@ -20,21 +20,46 @@
 
 <!-- Add your site or application content here -->
 <div class="ui container">
-    <br>
+    <h1>Create New User</h1>
     <form class="ui form" method="post" action="/user/create">
-        <h1>Create New User</h1>
         <div class="field ui input">
-            <input type="text" name="username" placeholder="username">
-        </div><br>
+            <input type="text" name="key" placeholder="key" required>
+        </div>
+        <br>
         <div class="field ui input">
-            <input type="password" name="password" placeholder="password">
-        </div><br>
+            <input type="text" name="username" placeholder="username" required>
+        </div>
+        <br>
         <div class="field ui input">
-            <input type="password" name="confirmPassword" placeholder="confirm password">
-        </div><br>
-        <button class="ui button" type="submit">Submit</button>
+            <input id="password1" type="password" name="password" placeholder="password" required>
+        </div>
+        <br>
+        <div class="field ui input">
+            <input id="password2" type="password" name="confirmPassword" placeholder="confirm password" required>
+        </div>
+        <br>
+        <button class="ui blue button" type="submit">Submit</button>
     </form>
 </div>
 
+<script type="text/javascript">
+    window.onload = function () {
+        document.getElementById("password1").onchange = validatePassword;
+        document.getElementById("password2").onchange = validatePassword;
+    };
+    var validatePassword = function () {
+        var pass2 = document.getElementById("password2").value;
+        var pass1 = document.getElementById("password1").value;
+        console.log(pass1 + ", " + pass2);
+        if (pass1 !== pass2) {
+            console.log("no match");
+            document.getElementById("password2").setCustomValidity("Passwords Don't Match");
+        } else {
+            console.log("match");
+            document.getElementById("password2").setCustomValidity('');
+            //empty string means no validation error
+        }
+    }
+</script>
 </body>
 </html>
