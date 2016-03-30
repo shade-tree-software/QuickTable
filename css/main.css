@@ -97,7 +97,25 @@ textarea {
 
 
 
+@media (max-width: 780px) {
+    .largeDisplay {
+        display: none !important;
+    }
+}
 
+@media (min-width: 779px) {
+    .smallDisplay {
+        display: none !important;
+    }
+}
+
+td span.header {
+    font-weight: bold;
+}
+
+td span.data {
+    font-weight: normal;
+}
 
 
 
