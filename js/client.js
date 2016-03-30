@@ -10,17 +10,22 @@ $(function () {
     $('#table').click(function (e) {
         e.stopPropagation();
     });
-    $('#cell-form').submit(function (e) {
+    var updateCell = function (e) {
         e.preventDefault();
         var $td = $('td.active');
-        var key = $td.parent().attr('data-key');
-        var col = $td.closest('table').find('th').eq($td.index()).html();
+        var existingVal = $td.find('span.data').text();
         var val = $('#cell-edit').find('input').val();
-        var data = {key: key, col: col, val: val};
-        var dataJSON = JSON.stringify(data);
-        console.log("sending 'update table cell' " + dataJSON);
-        server.emit('update table cell', dataJSON);
-    });
+        if (val !== existingVal) {
+            var key = $td.parent().attr('data-key');
+            var col = $td.closest('table').find('th').eq($td.index()).html();
+            var data = {key: key, col: col, val: val};
+            var dataJSON = JSON.stringify(data);
+            console.log("sending 'update table cell' " + dataJSON);
+            server.emit('update table cell', dataJSON);
+        }
+    };
+    $('#cell-form').submit(updateCell);
+    $('#cell-edit').find('input').blur(updateCell);
     $('body').click(function (e) {
         $('td').removeClass('active');
         $('#cell-edit').addClass('disabled').find('input').val('');
