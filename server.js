@@ -108,7 +108,7 @@ app.get('/css/vendor/themes/default/assets/fonts/:filename', function (req, res)
     res.sendFile(__dirname + '/css/vendor/themes/default/assets/fonts/' + req.params.filename);
 });
 
-var ssl_port = process.env.SSL_PORT || 8081;
+var ssl_port = process.env.PORT || 8081;
 ssl_server.listen(ssl_port, function () {
     console.log('listening on ssl port ' + ssl_port);
 });
