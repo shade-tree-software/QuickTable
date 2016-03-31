@@ -14,8 +14,10 @@ module.exports = function (redisClient, encryption) {
                 var numUsers = userKeys.length;
                 var counter = 0;
                 if (err) {
+                    console.log(err);
                     cb(err);
                 } else if (numUsers === 0) {
+                    console.log('no users');
                     cb(null, false);
                 } else {
                     userKeys.forEach(function (userKey) {
@@ -23,13 +25,16 @@ module.exports = function (redisClient, encryption) {
                             counter++;
                             if (found === false) {
                                 if (err) {
+                                    console.log(err);
                                     cb(err);
                                 } else {
                                     if (user.username === username) {
                                         found = true;
+                                        console.log('found user');
                                         cb(null, user);
                                     } else {
                                         if (counter === numUsers) {
+                                            console.log('could not find user');
                                             cb(null, false);
                                         }
                                     }
