@@ -3,10 +3,7 @@ var app = express();
 var passport = require('passport');
 var localStrategy = require('passport-local').Strategy;
 var fs = require('fs');
-var server = require('http').createServer({
-    key: fs.readFileSync('key.pem'),
-    cert: fs.readFileSync('cert.pem')
-}, app);
+var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 console.log("connecting to redis");
 var redisClient = require('redis').createClient(process.env.REDIS_URL);
@@ -108,8 +105,8 @@ app.get('/css/vendor/themes/default/assets/fonts/:filename', function (req, res)
     res.sendFile(__dirname + '/css/vendor/themes/default/assets/fonts/' + req.params.filename);
 });
 
-var ssl_port = process.env.PORT || 8081;
-server.listen(ssl_port, function () {
-    console.log('listening on port ' + ssl_port);
+var port = process.env.PORT || 8081;
+server.listen(port, function () {
+    console.log('listening on port ' + port);
 });
 
