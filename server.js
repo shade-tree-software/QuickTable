@@ -3,11 +3,11 @@ var app = express();
 var passport = require('passport');
 var localStrategy = require('passport-local').Strategy;
 var fs = require('fs');
-var ssl_server = require('https').createServer({
+var server = require('http').createServer({
     key: fs.readFileSync('key.pem'),
     cert: fs.readFileSync('cert.pem')
 }, app);
-var ssl_io = require('socket.io')(ssl_server);
+var io = require('socket.io')(server);
 console.log("connecting to redis");
 var redisClient = require('redis').createClient(process.env.REDIS_URL);
 redisClient.on("error", function (err) {
@@ -18,7 +18,7 @@ var encryption = require('./encryption');
 var users = require('./db/users')(redisClient, encryption);
 var socketIOHandlers = require('./socketIOHandlers')(redisClient, encryption);
 
-ssl_io.on('connection', socketIOHandlers);
+io.on('connection', socketIOHandlers);
 
 passport.use(new localStrategy(
     function (username, password, done) {
@@ -109,7 +109,7 @@ app.get('/css/vendor/themes/default/assets/fonts/:filename', function (req, res)
 });
 
 var ssl_port = process.env.PORT || 8081;
-ssl_server.listen(ssl_port, function () {
-    console.log('listening on ssl port ' + ssl_port);
+server.listen(ssl_port, function () {
+    console.log('listening on port ' + ssl_port);
 });
 
