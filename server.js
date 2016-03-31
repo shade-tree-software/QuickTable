@@ -14,7 +14,7 @@ var redisStore = require('connect-redis')(session);
 redisClient.on("error", function (err) {
     console.log(err.toString());
 });
-ssl_io.on('connection', socketIOHandlers);
+io.on('connection', socketIOHandlers);
 
 passport.use(new localStrategy(
     function (username, password, done) {
@@ -50,7 +50,8 @@ passport.deserializeUser(function (id, cb) {
 
 app.use(function (req, res, next) {
     if (req.headers['x-forwarded-proto'] != 'https') {
-        res.send(400);
+        next();
+        //res.sendStatus(400);
     } else {
         next(); // Continue to other routes if we're not redirecting
     }
