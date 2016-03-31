@@ -4,7 +4,11 @@ $(function () {
     $('table').tablesort();
     $("thead th:contains('Date')").data('sortBy', function (th, td, tablesort) {
         var dateString = td.find('span.data').text();
-        return new Date(dateString);
+        var date = new Date(dateString);
+        if (date == 'Invalid Date'){
+            date = new Date(0);
+        }
+        return date;
     });
 
     $('#table').click(function (e) {
