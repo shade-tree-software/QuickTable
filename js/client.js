@@ -64,6 +64,9 @@ $(function () {
         console.log("sending 'request all' to server");
         server.emit("request all");
     });
+    server.on('title', function(dataJSON){
+        $('.title').html(JSON.parse(dataJSON).title);
+    });
     server.on('update table cell', function (dataJSON) {
         console.log("received 'update table cell' " + dataJSON);
         var data = JSON.parse(dataJSON);

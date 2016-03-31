@@ -7,6 +7,7 @@ var broadcastAll = function (client, message, data, logData) {
 module.exports = function (redisClient, encryption) {
     return function (client) {
         console.log('new client connected: ' + client.request.connection.remoteAddress);
+        client.emit('title', JSON.stringify({title: process.env.TITLE || 'Table'}));
         client.on('request all', function () {
             console.log("received 'request all' from client");
             redisClient.smembers('row keys', function (err, rowKeys) {
