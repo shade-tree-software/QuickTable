@@ -1,21 +1,20 @@
-var express = require('express');
-var app = express();
+var app = require('express')();
 var passport = require('passport');
 var localStrategy = require('passport-local').Strategy;
 var fs = require('fs');
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
-console.log("connecting to redis");
 var redisClient = require('redis').createClient(process.env.REDIS_URL);
+var encryption = require('./encryption');
+var users = require('./db/users')(redisClient, encryption);
+var socketIOHandlers = require('./socketIOHandlers')(redisClient, encryption);
+var session = require('express-session');
+var redisStore = require('connect-redis')(session);
+
 redisClient.on("error", function (err) {
     console.log(err.toString());
 });
-var encryption = require('./encryption');
-
-var users = require('./db/users')(redisClient, encryption);
-var socketIOHandlers = require('./socketIOHandlers')(redisClient, encryption);
-
-io.on('connection', socketIOHandlers);
+ssl_io.on('connection', socketIOHandlers);
 
 passport.use(new localStrategy(
     function (username, password, done) {
@@ -58,11 +57,12 @@ app.use(function (req, res, next) {
 });
 
 app.use(require('body-parser').urlencoded({extended: true}));
-app.use(require('express-session')({
+app.use(session({
     secret: process.env.ENCRYPTION_KEY,
     resave: false,
     saveUninitialized: false,
-    cookie: {secure: true}
+    cookie: {secure: true},
+    store: new redisStore({client: redisClient})
 }));
 app.use(passport.initialize());
 app.use(passport.session());
