@@ -20,9 +20,15 @@ io.on('connection', socketIOHandlers);
 passport.use(new localStrategy(
     function (username, password, done) {
         users.findByUsername(username, function (err, user) {
-            if (err) { return done(err); }
-            if (!user) { return done(null, false); }
-            if (user.password !== encryption.hashString(password)) { return done(null, false); }
+            if (err) {
+                return done(err);
+            }
+            if (!user) {
+                return done(null, false);
+            }
+            if (user.password !== encryption.hashString(password)) {
+                return done(null, false);
+            }
             return done(null, user);
         });
     }
@@ -34,9 +40,19 @@ passport.serializeUser(function (user, cb) {
 
 passport.deserializeUser(function (id, cb) {
     users.findById(id, function (err, user) {
-        if (err) { return cb(err); }
+        if (err) {
+            return cb(err);
+        }
         cb(null, user);
     });
+});
+
+app.use(function (req, res, next) {
+    if (req.headers['x-forwarded-proto'] != 'https') {
+        res.send(400);
+    } else {
+        next(); // Continue to other routes if we're not redirecting
+    }
 });
 
 app.use(require('body-parser').urlencoded({extended: true}));
