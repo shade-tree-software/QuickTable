@@ -27,8 +27,10 @@ passport.use(new localStrategy(
                 return done(null, false);
             }
             if (user.password !== encryption.hashString(password)) {
+                console.log('invalid password');
                 return done(null, false);
             }
+            console.log('password match');
             return done(null, user);
         });
     }
@@ -86,6 +88,7 @@ app.get('/login', function (req, res) {
 app.post('/login',
     passport.authenticate('local', {failureRedirect: '/login'}),
     function (req, res) {
+        console.log('redirecting to /');
         res.redirect('/');
     });
 
