@@ -1,11 +1,12 @@
 $(function () {
     var server = io.connect(window.location.href);
 
-    $('table').tablesort();
+    var $table = $('table');
+    $table.tablesort();
     $("thead th:contains('Date')").data('sortBy', function (th, td, tablesort) {
         var dateString = td.find('span.data').text();
         var date = new Date(dateString);
-        if (date == 'Invalid Date'){
+        if (date == 'Invalid Date') {
             date = new Date(0);
         }
         return date;
@@ -61,6 +62,14 @@ $(function () {
         console.log("sending 'delete row' " + dataJSON);
         server.emit('delete row', dataJSON);
     };
+    var sortTable = function () {
+        var $th = $table.find('th.sorted');
+        if ($th.hasClass('descending')) {
+            $table.data('tablesort').sort($th, 'desc');
+        } else if ($th.hasClass('ascending')) {
+            $table.data('tablesort').sort($th, 'asc');
+        }
+    };
 
     server.on('connect', function () {
         console.log('established new connection to server, clearing local table');
@@ -68,7 +77,7 @@ $(function () {
         console.log("sending 'request all' to server");
         server.emit("request all");
     });
-    server.on('title', function(dataJSON){
+    server.on('title', function (dataJSON) {
         $('.title').html(JSON.parse(dataJSON).title);
     });
     server.on('update table cell', function (dataJSON) {
@@ -76,6 +85,7 @@ $(function () {
         var data = JSON.parse(dataJSON);
         var index = $('th:contains(' + data.col + ')').index();
         $('tr[data-key="' + data.key + '"]').find('td').eq(index).find('span.data').html(data.val);
+        sortTable();
     });
     server.on('delete row', function (dataJSON) {
         console.log("received 'delete row' " + dataJSON);
@@ -104,5 +114,6 @@ $(function () {
             }
         });
         $('table').append($tr);
+        sortTable();
     });
 });
