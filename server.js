@@ -10,6 +10,7 @@ var users = require('./db/users')(redisClient, encryption);
 var socketIOHandlers = require('./socketIOHandlers')(redisClient, encryption);
 var session = require('express-session');
 var redisStore = require('connect-redis')(session);
+var port = process.env.PORT || 8080;
 
 // Connect to Redis and configure Socket-IO handlers
 redisClient.on("error", function (err) {
@@ -50,11 +51,10 @@ passport.deserializeUser(function (id, cb) {
 
 // Middleware
 app.use(function (req, res, next) {
-    if (req.headers['x-forwarded-proto'] != 'https') {
-        //next();
-        res.sendStatus(400);
-    } else {
+    if (req.headers['x-forwarded-proto'] === 'https' || port === 8080) {
         next();
+    } else {
+        res.sendStatus(400);
     }
 });
 app.use(require('body-parser').urlencoded({extended: true}));
@@ -127,7 +127,6 @@ app.get('/css/vendor/themes/default/assets/fonts/:filename', function (req, res)
 });
 
 // Start server
-var port = process.env.PORT || 8080;
 server.listen(port, function () {
     console.log('listening on port ' + port);
 });

@@ -29,7 +29,7 @@ $(function () {
         }
     };
     $('#cell-form').submit(updateCell);
-    $('#cell-edit').find('input').blur(updateCell);
+    $('#cell-edit').find('input')[0].oninput = updateCell;
     $('body').click(function (e) {
         $('td').removeClass('active');
         $('#cell-edit').addClass('disabled').find('input').val('');
@@ -51,7 +51,7 @@ $(function () {
     var tdOnClick = function (e) {
         $('td').removeClass('active');
         $(this).addClass('active');
-        $('#cell-edit').removeClass('disabled').find('input').focus().val($(this).find('span.data').html());
+        $('#cell-edit').removeClass('disabled').find('input').focus().val($(this).find('span.data').html()).select();
         $('#cell-ok').removeClass('disabled');
     };
 
