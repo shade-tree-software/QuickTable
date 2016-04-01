@@ -11,6 +11,9 @@ $(function () {
         }
         return date;
     });
+    $table.on('tablesort:start', function(event, tablesort) {
+        console.log("Starting the sort...");
+    });
 
     $('#table').click(function (e) {
         e.stopPropagation();
@@ -83,9 +86,12 @@ $(function () {
     server.on('update table cell', function (dataJSON) {
         console.log("received 'update table cell' " + dataJSON);
         var data = JSON.parse(dataJSON);
-        var index = $('th:contains(' + data.col + ')').index();
-        $('tr[data-key="' + data.key + '"]').find('td').eq(index).find('span.data').html(data.val);
-        sortTable();
+        var $th = $('th:contains(' + data.col + ')');
+        var columnIndex = $th.index();
+        $('tr[data-key="' + data.key + '"]').find('td').eq(columnIndex).find('span.data').html(data.val);
+        if ($th.hasClass('sorted')) {
+            sortTable();
+        }
     });
     server.on('delete row', function (dataJSON) {
         console.log("received 'delete row' " + dataJSON);
