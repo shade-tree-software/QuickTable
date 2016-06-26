@@ -118,8 +118,17 @@ td span.data {
     font-weight: normal;
 }
 
+tr[data-color=pink] {
+    background-color: #ffcfde !important;
+}
 
+tr[data-color=blue] {
+    background-color: lightblue !important;
+}
 
+tr[data-color=purple] {
+    background-color: #f0d8f0 !important;
+}
 
 
 

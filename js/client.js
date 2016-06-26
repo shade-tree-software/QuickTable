@@ -3,15 +3,37 @@ $(function () {
 
     var $table = $('table');
     $table.tablesort();
+
+    var setColorByDate = function (tr, date, dateString) {
+        if (date == 'Invalid Date') {
+            if (dateString === 'deleted') {
+                tr.attr('data-color', 'blue');
+            } else if (dateString === '') {
+                tr.removeAttr('data-color');
+            } else {
+                tr.attr('data-color', 'pink');
+            }
+        } else {
+            var now = new Date();
+            var oneWeekAgo = new Date().setDate(now.getDate() - 7);
+            if (date < oneWeekAgo) {
+                tr.attr('data-color', 'purple');
+            } else {
+                tr.removeAttr('data-color');
+            }
+        }
+    };
+
     $("thead th:contains('Date')").data('sortBy', function (th, td, tablesort) {
         var dateString = td.find('span.data').text();
         var date = new Date(dateString);
+        setColorByDate(td.parent(), date, dateString);
         if (date == 'Invalid Date') {
             date = new Date(0);
         }
         return date;
     });
-    $table.on('tablesort:start', function(event, tablesort) {
+    $table.on('tablesort:start', function (event, tablesort) {
         console.log("Starting the sort...");
     });
 
