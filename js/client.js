@@ -40,7 +40,11 @@ $(function () {
     $('#table').click(function (e) {
         e.stopPropagation();
     });
-    var updateCell = function (e) {
+    var $cellEdit = $('#cell-edit');
+    $cellEdit.click(function (e) {
+        e.stopPropagation();
+    });
+    $cellEdit.find('input')[0].oninput = function (e) {
         e.preventDefault();
         var $td = $('td.active');
         var existingVal = $td.find('span.data').text();
@@ -54,10 +58,6 @@ $(function () {
             server.emit('update table cell', dataJSON);
         }
     };
-    $('#cell-form').submit(function(){
-        updateCell();
-    });
-    $('#cell-edit').find('input')[0].oninput = updateCell;
     $('body').click(function (e) {
         $('td').removeClass('active');
         $('#cell-edit').hide().find('input').val('');
