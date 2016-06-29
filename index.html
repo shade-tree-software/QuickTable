@@ -19,26 +19,30 @@
 <![endif]-->
 
 <!-- Add your site or application content here -->
-<div class="ui blue inverted menu">
-    <div class="title header item">
+<div id="top">
+    <div class="ui blue inverted sticky menu">
+        <div class="title header item">
+        </div>
+        <div class="right menu">
+            <a class="ui item" href="/logout">
+                Logout
+            </a>
+        </div>
     </div>
-    <div class="right menu">
-        <a class="ui item" href="/logout">
-            Logout
-        </a>
+    <div class="ui container">
+        <form id="cell-form" class="ui sticky inline form">
+            <div class="inline field">
+                <div id="cell-edit" class="ui input" style="display: none;">
+                    <input>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
+<div id="placeholder"></div>
 <div class="ui container">
     <br>
     <div id="table">
-        <form id="cell-form" class="ui inline form">
-            <div class="inline field">
-                <div id="cell-edit" class="ui disabled input">
-                    <input >
-                </div>
-                <button id="cell-ok" class="ui disabled small blue button" type="submit">OK</button>
-            </div>
-        </form>
         <table class="ui sortable green celled striped table">
             <thead>
             <tr>

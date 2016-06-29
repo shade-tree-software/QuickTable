@@ -95,10 +95,8 @@ textarea {
    Author's custom styles
    ========================================================================== */
 
-
-
 @media only screen and (max-width: 767px) {
-    .ui.table:not(.unstackable) tr>td.largeDisplay, /* overrides semantic ui style */
+    .ui.table:not(.unstackable) tr > td.largeDisplay, /* overrides semantic ui style */
     .largeDisplay {
         display: none !important;
     }
@@ -118,26 +116,36 @@ td span.data {
     font-weight: normal;
 }
 
+#top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 99999;
+    width: 100%;
+    height: 50px;
+}
 
+#placeholder {
+    height: 50px;
+}
 
+img {
+    height: auto;
+    width: 50px;
+}
 
-
-
-
-
-
-
-
-
+@media only screen and (max-width: 767px) {
+    .ui.table:not(.unstackable) tr > td, .ui.table:not(.unstackable) tr > th {
+        padding: .75em !important;
+    }
+}
 
 /* ==========================================================================
    Helper classes
    ========================================================================== */
-
 /*
  * Hide visually and from screen readers
  */
-
 .hidden {
     display: none !important;
 }
@@ -146,7 +154,6 @@ td span.data {
  * Hide only visually, but have it available for screen readers:
  * http://snook.ca/archives/html_and_css/hiding-content-for-accessibility
  */
-
 .visuallyhidden {
     border: 0;
     clip: rect(0 0 0 0);
@@ -163,7 +170,6 @@ td span.data {
  * to be focusable when navigated to via the keyboard:
  * https://www.drupal.org/node/897638
  */
-
 .visuallyhidden.focusable:active,
 .visuallyhidden.focusable:focus {
     clip: auto;
@@ -177,7 +183,6 @@ td span.data {
 /*
  * Hide visually and from screen readers, but maintain layout
  */
-
 .invisible {
     visibility: hidden;
 }
@@ -193,7 +198,6 @@ td span.data {
  * 2. The use of `table` rather than `block` is only necessary if using
  *    `:before` to contain the top-margins of child elements.
  */
-
 .clearfix:before,
 .clearfix:after {
     content: " "; /* 1 */
@@ -209,15 +213,14 @@ td span.data {
    These examples override the primary ('mobile first') styles.
    Modify as content requires.
    ========================================================================== */
-
 @media only screen and (min-width: 35em) {
     /* Style adjustments for viewports that meet the condition */
 }
 
 @media print,
-       (-webkit-min-device-pixel-ratio: 1.25),
-       (min-resolution: 1.25dppx),
-       (min-resolution: 120dpi) {
+(-webkit-min-device-pixel-ratio: 1.25),
+(min-resolution: 1.25dppx),
+(min-resolution: 120dpi) {
     /* Style adjustments for high resolution devices */
 }
 
@@ -226,7 +229,6 @@ td span.data {
    Inlined to avoid the additional HTTP request:
    http://www.phpied.com/delay-loading-your-print-css/
    ========================================================================== */
-
 @media print {
     *,
     *:before,
@@ -234,8 +236,9 @@ td span.data {
     *:first-letter,
     *:first-line {
         background: transparent !important;
-        color: #000 !important; /* Black prints faster:
-                                   http://www.sanbeiji.com/archives/953 */
+        color: #000 !important;
+        /* Black prints faster:
+                                          http://www.sanbeiji.com/archives/953 */
         box-shadow: none !important;
         text-shadow: none !important;
     }
@@ -257,7 +260,6 @@ td span.data {
      * Don't show links that are fragment identifiers,
      * or use the `javascript:` pseudo protocol
      */
-
     a[href^="#"]:after,
     a[href^="javascript:"]:after {
         content: "";
@@ -273,7 +275,6 @@ td span.data {
      * Printing Tables:
      * http://css-discuss.incutio.com/wiki/Printing_Tables
      */
-
     thead {
         display: table-header-group;
     }
