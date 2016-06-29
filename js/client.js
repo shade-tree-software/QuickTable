@@ -54,12 +54,13 @@ $(function () {
             server.emit('update table cell', dataJSON);
         }
     };
-    $('#cell-form').submit(updateCell);
+    $('#cell-form').submit(function(){
+        updateCell();
+    });
     $('#cell-edit').find('input')[0].oninput = updateCell;
     $('body').click(function (e) {
         $('td').removeClass('active');
-        $('#cell-edit').addClass('disabled').find('input').val('');
-        $('#cell-ok').addClass('disabled');
+        $('#cell-edit').hide().find('input').val('');
     });
     $('#new-row').click(function (e) {
         var row = {};
@@ -77,8 +78,7 @@ $(function () {
     var tdOnClick = function (e) {
         $('td').removeClass('active');
         $(this).addClass('active');
-        $('#cell-edit').removeClass('disabled').find('input').focus().val($(this).find('span.data').html()).select();
-        $('#cell-ok').removeClass('disabled');
+        $('#cell-edit').show().find('input').focus().val($(this).find('span.data').html()).select();
     };
 
     var trashOnClick = function (e) {
