@@ -85,10 +85,12 @@ $(function () {
     };
 
     var trashOnClick = function (e) {
-        var key = $(this).parent().attr('data-key');
-        var dataJSON = JSON.stringify({key: key});
-        console.log("sending 'delete row' " + dataJSON);
-        server.emit('delete row', dataJSON);
+        if (window.confirm("Are you sure?")) {
+            var key = $(this).parent().attr('data-key');
+            var dataJSON = JSON.stringify({key: key});
+            console.log("sending 'delete row' " + dataJSON);
+            server.emit('delete row', dataJSON);
+        }
     };
     var sortTable = function () {
         var $th = $table.find('th.sorted');
