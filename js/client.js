@@ -16,8 +16,11 @@ $(function () {
         } else {
             var now = new Date();
             var oneWeekAgo = new Date().setDate(now.getDate() - 7);
+            var twoDaysAgo = new Date().setDate(now.getDate() - 2);
             if (date < oneWeekAgo) {
                 tr.attr('data-color', 'purple');
+            } else if (date < twoDaysAgo) {
+                tr.attr('data-color', 'green');
             } else {
                 tr.removeAttr('data-color');
             }
