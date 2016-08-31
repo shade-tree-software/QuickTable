@@ -132,6 +132,10 @@ tr[data-color=green] {
     background-color: lightgreen !important;
 }
 
+tr[data-archived=true] {
+    color: lightgray !important;
+}
+
 #top {
     position: fixed;
     top: 0;

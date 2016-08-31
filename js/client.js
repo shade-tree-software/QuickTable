@@ -77,20 +77,46 @@ $(function () {
         console.log("sending 'new table row' " + rowJSON);
         server.emit('new table row', rowJSON);
     });
+    $('#toggle-archived').click(function (e) {
+        var $this = $(this);
+        if ($this.text() === 'Show Archived') {
+            $('tr[data-archived=true]').show();
+            $this.text('Hide Archived');
+        } else {
+            $('tr[data-archived=true]').hide();
+            $this.text('Show Archived');
+        }
+    });
 
     var tdOnClick = function (e) {
-        $('td').removeClass('active');
-        $(this).addClass('active');
-        $('#cell-edit').show().find('input').focus().val($(this).find('span.data').html()).select();
+        var $this = $(this);
+        if ($this.parent().attr('data-archived') !== 'true') {
+            $('td').removeClass('active');
+            $this.addClass('active');
+            $('#cell-edit').show().find('input').focus().val($this.find('span.data').html()).select();
+        }
     };
 
     var trashOnClick = function (e) {
-        if (window.confirm("Are you sure?")) {
-            var key = $(this).parent().attr('data-key');
-            var dataJSON = JSON.stringify({key: key});
-            console.log("sending 'delete row' " + dataJSON);
-            server.emit('delete row', dataJSON);
+        var $this = $(this);
+        if ($this.parent().attr('data-archived') !== 'true') {
+            if (window.confirm("Are you sure?")) {
+                var key = $this.parent().attr('data-key');
+                var dataJSON = JSON.stringify({key: key});
+                console.log("sending 'delete row' " + dataJSON);
+                server.emit('delete row', dataJSON);
+            }
         }
+    };
+    var archiveOnClick = function (e) {
+        var key = $(this).parent().attr('data-key');
+        var dataArchived = $(this).parent().attr('data-archived');
+        var val = (dataArchived === 'true' ? 'false' : 'true');
+        var col = '_archived';
+        var data = {key: key, col: col, val: val};
+        var dataJSON = JSON.stringify(data);
+        console.log("sending 'update table cell' " + dataJSON);
+        server.emit('update table cell', dataJSON);
     };
     var sortTable = function () {
         var $th = $table.find('th.sorted');
@@ -113,11 +139,27 @@ $(function () {
     server.on('update table cell', function (dataJSON) {
         console.log("received 'update table cell' " + dataJSON);
         var data = JSON.parse(dataJSON);
-        var $th = $('th:contains(' + data.col + ')');
-        var columnIndex = $th.index();
-        $('tr[data-key="' + data.key + '"]').find('td').eq(columnIndex).find('span.data').html(data.val);
-        if ($th.hasClass('sorted')) {
-            sortTable();
+        if (data.col === '_archived') {
+            var $tr = $('tr[data-key="' + data.key + '"]');
+            $tr.attr('data-archived', data.val);
+            var $toggleArchived = $('#toggle-archived');
+            if (data.val === 'true' && $toggleArchived.text() === 'Show Archived') {
+                $tr.hide();
+            } else {
+                $tr.show();
+            }
+            if ($('tr[data-archived=true]').size() < 1){
+                $toggleArchived.hide();
+            }else{
+                $toggleArchived.show();
+            }
+        } else {
+            var $th = $('th:contains(' + data.col + ')');
+            var columnIndex = $th.index();
+            $('tr[data-key="' + data.key + '"]').find('td').eq(columnIndex).find('span.data').html(data.val);
+            if ($th.hasClass('sorted')) {
+                sortTable();
+            }
         }
     });
     server.on('delete row', function (dataJSON) {
@@ -128,18 +170,32 @@ $(function () {
     server.on('new table row', function (rowJSON) {
         console.log("received 'new table row' " + rowJSON);
         var row = JSON.parse(rowJSON);
-        var $tr = $('<tr data-key="' + row.key + '"></tr>');
+        var $tr = $('<tr data-key="' + row.key + '"' + '></tr>');
+        if (row.data['_archived']) {
+            $tr.attr('data-archived', row.data['_archived']);
+            var $toggleArchived = $('#toggle-archived');
+            if (row.data['_archived'] === 'true' && $toggleArchived.text() === 'Show Archived') {
+                $tr.hide();
+            } else {
+                $tr.show();
+            }
+            if ($('tr[data-archived=true]').size() < 1){
+                $toggleArchived.hide();
+            }else{
+                $toggleArchived.show();
+            }
+        }
         var $smallTrashIcon = $('<i class="smallDisplay ui left aligned trash outline icon"></i>');
         var $largeTrashIcon = $('<i class="largeDisplay ui center aligned trash outline icon"></i>');
         var $trashTd = $('<td class="ui collapsing"></td>');
         $trashTd.append($smallTrashIcon).append($largeTrashIcon);
         $trashTd.click(trashOnClick);
         $tr.append($trashTd);
-        var $smallArchiveIcon = $('<i class="smallDisplay ui left aligned red arrow down icon"></i>');
-        var $largeArchiveIcon = $('<i class="largeDisplay ui center aligned red arrow down icon"></i>');
+        var $smallArchiveIcon = $('<i class="smallDisplay ui left aligned archive icon"></i>');
+        var $largeArchiveIcon = $('<i class="largeDisplay ui center aligned archive icon"></i>');
         var $archiveTd = $('<td class="ui collapsing"></td>');
         $archiveTd.append($smallArchiveIcon).append($largeArchiveIcon);
-        //$archiveTd.click(archiveOnClick);
+        $archiveTd.click(archiveOnClick);
         $tr.append($archiveTd);
         $('th').each(function () {
             var thText = $(this).html();
