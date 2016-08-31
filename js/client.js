@@ -16,8 +16,11 @@ $(function () {
         } else {
             var now = new Date();
             var oneWeekAgo = new Date().setDate(now.getDate() - 7);
+            var twoDaysAgo = new Date().setDate(now.getDate() - 2);
             if (date < oneWeekAgo) {
                 tr.attr('data-color', 'purple');
+            } else if (date < twoDaysAgo) {
+                tr.attr('data-color', 'green');
             } else {
                 tr.removeAttr('data-color');
             }
@@ -82,10 +85,12 @@ $(function () {
     };
 
     var trashOnClick = function (e) {
-        var key = $(this).parent().attr('data-key');
-        var dataJSON = JSON.stringify({key: key});
-        console.log("sending 'delete row' " + dataJSON);
-        server.emit('delete row', dataJSON);
+        if (window.confirm("Are you sure?")) {
+            var key = $(this).parent().attr('data-key');
+            var dataJSON = JSON.stringify({key: key});
+            console.log("sending 'delete row' " + dataJSON);
+            server.emit('delete row', dataJSON);
+        }
     };
     var sortTable = function () {
         var $th = $table.find('th.sorted');
