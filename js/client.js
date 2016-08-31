@@ -126,10 +126,16 @@ $(function () {
         var $tr = $('<tr data-key="' + row.key + '"></tr>');
         var $smallTrashIcon = $('<i class="smallDisplay ui left aligned trash outline icon"></i>');
         var $largeTrashIcon = $('<i class="largeDisplay ui center aligned trash outline icon"></i>');
-        $trashTd = $('<td class="ui collapsing"></td>');
+        var $trashTd = $('<td class="ui collapsing"></td>');
         $trashTd.append($smallTrashIcon).append($largeTrashIcon);
         $trashTd.click(trashOnClick);
         $tr.append($trashTd);
+        var $smallArchiveIcon = $('<i class="smallDisplay ui left aligned red arrow down icon"></i>');
+        var $largeArchiveIcon = $('<i class="largeDisplay ui center aligned red arrow down icon"></i>');
+        var $archiveTd = $('<td class="ui collapsing"></td>');
+        $archiveTd.append($smallArchiveIcon).append($largeArchiveIcon);
+        //$archiveTd.click(archiveOnClick);
+        $tr.append($archiveTd);
         $('th').each(function () {
             var thText = $(this).html();
             if (thText.length > 0) {
