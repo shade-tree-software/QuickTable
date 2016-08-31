@@ -80,10 +80,10 @@ $(function () {
     $('#toggle-archived').click(function (e) {
         var $this = $(this);
         if ($this.text() === 'Show Archived') {
-            $('tr[data-archived=true]').show();
+            $('tr[data-archived=true]').removeClass('hidden').css('display', 'table-row');
             $this.text('Hide Archived');
         } else {
-            $('tr[data-archived=true]').hide();
+            $('tr[data-archived=true]').addClass('hidden').attr('style', 'display:none !important');
             $this.text('Show Archived');
         }
     });
@@ -144,14 +144,20 @@ $(function () {
             $tr.attr('data-archived', data.val);
             var $toggleArchived = $('#toggle-archived');
             if (data.val === 'true' && $toggleArchived.text() === 'Show Archived') {
-                $tr.hide();
+                $tr.addClass('hidden').attr('style', 'display:none !important');
             } else {
-                $tr.show();
+                $tr.removeClass('hidden').css('display', 'table-row');
             }
-            if ($('tr[data-archived=true]').size() < 1){
-                $toggleArchived.hide();
-            }else{
-                $toggleArchived.show();
+            if ($('tr[data-archived=true]').size() < 1) {
+                $toggleArchived.addClass('hidden');
+            } else {
+                $toggleArchived.removeClass('hidden');
+            }
+            var $td = $tr.find('td .hide.icon, td .unhide.icon');
+            if ($tr.attr('data-archived') === 'true') {
+                $td.removeClass('hide').addClass('unhide');
+            } else {
+                $td.removeClass('unhide').addClass('hide');
             }
         } else {
             var $th = $('th:contains(' + data.col + ')');
@@ -175,14 +181,14 @@ $(function () {
             $tr.attr('data-archived', row.data['_archived']);
             var $toggleArchived = $('#toggle-archived');
             if (row.data['_archived'] === 'true' && $toggleArchived.text() === 'Show Archived') {
-                $tr.hide();
+                $tr.addClass('hidden').attr('style', 'display:none !important');
             } else {
-                $tr.show();
+                $tr.removeClass('hidden').css('display', 'table-row');
             }
-            if ($('tr[data-archived=true]').size() < 1){
-                $toggleArchived.hide();
-            }else{
-                $toggleArchived.show();
+            if ($('tr[data-archived=true]').size() < 1) {
+                $toggleArchived.addClass('hidden');
+            } else {
+                $toggleArchived.removeClass('hidden');
             }
         }
         var $smallTrashIcon = $('<i class="smallDisplay ui left aligned trash outline icon"></i>');
@@ -191,8 +197,12 @@ $(function () {
         $trashTd.append($smallTrashIcon).append($largeTrashIcon);
         $trashTd.click(trashOnClick);
         $tr.append($trashTd);
-        var $smallArchiveIcon = $('<i class="smallDisplay ui left aligned archive icon"></i>');
-        var $largeArchiveIcon = $('<i class="largeDisplay ui center aligned archive icon"></i>');
+        var hideIcon = 'hide';
+        if ($tr.attr('data-archived') === 'true'){
+            hideIcon = 'unhide';
+        }
+        var $smallArchiveIcon = $('<i class="smallDisplay ui left aligned ' + hideIcon + ' icon"></i>');
+        var $largeArchiveIcon = $('<i class="largeDisplay ui center aligned ' + hideIcon + ' icon"></i>');
         var $archiveTd = $('<td class="ui collapsing"></td>');
         $archiveTd.append($smallArchiveIcon).append($largeArchiveIcon);
         $archiveTd.click(archiveOnClick);

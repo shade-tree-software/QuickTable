@@ -96,7 +96,7 @@ textarea {
    ========================================================================== */
 
 @media only screen and (max-width: 767px) {
-    .ui.table:not(.unstackable) tr>td.largeDisplay, /* overrides semantic ui style */
+    .ui.table:not(.unstackable) tr > td.largeDisplay, /* overrides semantic ui style */
     .largeDisplay {
         display: none !important;
     }
@@ -132,8 +132,13 @@ tr[data-color=green] {
     background-color: lightgreen !important;
 }
 
-tr[data-archived=true] {
+tr[data-archived=true] td {
     color: lightgray !important;
+}
+
+tr[data-archived=true] td .hide.icon,
+tr[data-archived=true] td .unhide.icon{
+    color: black !important;
 }
 
 #top {
@@ -238,9 +243,9 @@ img {
 }
 
 @media print,
-       (-webkit-min-device-pixel-ratio: 1.25),
-       (min-resolution: 1.25dppx),
-       (min-resolution: 120dpi) {
+(-webkit-min-device-pixel-ratio: 1.25),
+(min-resolution: 1.25dppx),
+(min-resolution: 120dpi) {
     /* Style adjustments for high resolution devices */
 }
 
